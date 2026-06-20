@@ -1,0 +1,50 @@
+.footer {
+  border-top: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  padding: 3rem 0;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.socials {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.socialIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.socialIcon:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+}
