@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
 import Button from '../components/ui/Button';
 import styles from './Contact.module.css';
 
@@ -24,6 +25,7 @@ export const Contact: React.FC = () => {
   const [touched, setTouched] = useState<{ [key in keyof FormState]?: boolean }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validateField = (name: keyof FormState, value: string): string => {
     if (!value.trim()) {
@@ -57,7 +59,7 @@ export const Contact: React.FC = () => {
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Mark all fields touched
@@ -80,14 +82,35 @@ export const Contact: React.FC = () => {
 
     if (hasErrors) return;
 
-    // Simulate backend submission request
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setForm({ name: '', email: '', message: '' });
-      setTouched({});
-    }, 1500);
+    setSubmitError(null);
+
+    if (isSupabaseConfigured) {
+      try {
+        const { error } = await supabase!
+          .from('contacts')
+          .insert([{ name: form.name, email: form.email, message: form.message }]);
+
+        if (error) throw error;
+
+        setIsSuccess(true);
+        setForm({ name: '', email: '', message: '' });
+        setTouched({});
+      } catch (err: any) {
+        console.error('Error submitting form to Supabase:', err);
+        setSubmitError(err.message || 'An error occurred while sending your message. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // Simulate backend submission request (fallback)
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        setForm({ name: '', email: '', message: '' });
+        setTouched({});
+      }, 1500);
+    }
   };
 
   const getFieldClass = (name: keyof FormState) => {
@@ -239,6 +262,12 @@ export const Contact: React.FC = () => {
                       </span>
                     )}
                   </div>
+
+                  {submitError && (
+                    <span className={styles.errorText} style={{ textAlign: 'center', display: 'block' }} role="alert">
+                      {submitError}
+                    </span>
+                  )}
 
                   <Button type="submit" isLoading={isSubmitting}>
                     Send Message <Send size={16} />
